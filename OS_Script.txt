@@ -1,0 +1,443 @@
+---
+API: 2
+OpenSesame: 3.1.6
+Platform: posix
+---
+set width 1024
+set uniform_coordinates yes
+set title "New experiment"
+set subject_parity even
+set subject_nr 0
+set start experiment
+set sound_sample_size -16
+set sound_freq 22000
+set sound_channels 1
+set sound_buf_size 2048
+set sampler_backend legacy
+set round_decimals 2
+set mouse_backend legacy
+set keyboard_backend legacy
+set height 768
+set fullscreen no
+set form_clicks no
+set foreground white
+set font_underline no
+set font_size 18
+set font_italic no
+set font_family mono
+set font_bold no
+set experiment_path "/media/rbot/My Passport/Kubuntu backup/Documents/Experiments/BART/Behavioral"
+set disable_garbage_collection yes
+set description "Default description"
+set coordinates uniform
+set compensation 0
+set color_backend legacy
+set clock_backend legacy
+set canvas_backend legacy
+set bidi no
+set background black
+
+define sequence BART
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run BART_block_prepare always
+	run BART_Trials_Loop always
+	run Bart_Post_Trials_sequence always
+
+define loop BART_Loop
+	set source_file ""
+	set source table
+	set skip 0
+	set repeat 20
+	set order random
+	set offset no
+	set item BART
+	set description "Repeatedly runs another item"
+	set cycles 1
+	set continuous no
+	set column_order ""
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 empty_column ""
+	run BART
+
+define loop BART_Trials_Loop
+	set source_file ""
+	set source table
+	set skip 0
+	set repeat 1
+	set order random
+	set offset no
+	set item BART_Trials_sequence
+	set description "Repeatedly runs another item"
+	set cycles 20
+	set continuous no
+	set column_order ""
+	set break_if_on_first yes
+	set break_if "[break_bool] = 1"
+	setcycle 0 empty_column ""
+	setcycle 1 empty_column ""
+	setcycle 2 empty_column ""
+	setcycle 3 empty_column ""
+	setcycle 4 empty_column ""
+	setcycle 5 empty_column ""
+	setcycle 6 empty_column ""
+	setcycle 7 empty_column ""
+	setcycle 8 empty_column ""
+	setcycle 9 empty_column ""
+	setcycle 10 empty_column ""
+	setcycle 11 empty_column ""
+	setcycle 12 empty_column ""
+	setcycle 13 empty_column ""
+	setcycle 14 empty_column ""
+	setcycle 15 empty_column ""
+	setcycle 16 empty_column ""
+	setcycle 17 empty_column ""
+	setcycle 18 empty_column ""
+	setcycle 19 empty_column ""
+	run BART_Trials_sequence
+
+define sequence BART_Trials_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run Inflate_sequence "[explode] = no"
+	run Explode_sequence "[explode] = yes"
+	run Rounds_controller "[explode] = no"
+	run new_advanced_delay always
+
+define inline_script BART_block_prepare
+	set description "Executes Python code"
+	___run__
+	var.explode = u'no'
+	var.rounds = 1
+	var_list = ['subject_nr', 'count_BART', 'count_BART_Trials_sequence', 'rounds', 'response_time_Trial_decision', 'response_Trial_decision', 'explode']
+	temp_pennies = 0.0
+	var.temp_cash = "$%.2f" % temp_pennies
+	var.break_bool = 0
+	var.Probability = 0.0
+	__end__
+	set _prepare ""
+
+define sequence Bart_Post_Trials_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run Sum_total_earnings always
+	run Total_earnings always
+
+define sketchpad Begin_BART
+	set duration keypress
+	set description "Displays stimuli"
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=24 html=yes show_if=always text="Let's earn some real money now.<br /><br />Don't forget, Spacebar<br /><br />inflates the balloon,<br /><br />while Enter puts your new earnings<br /><br />in the bank and starts a new balloon.<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />Press any button to continue." x=0 y=0 z_index=0
+
+define inline_script Clear_temporary_earnings
+	set description "Executes Python code"
+	___run__
+	temp_pennies = 0.0
+	var.break_bool = 1
+	__end__
+	set _prepare ""
+
+define inline_script Decision_made
+	set description "Executes Python code"
+	___run__
+	if var.response_Trial_decision == var.cash_out_button:
+		var.explode = u'no'
+	log.write_vars(var_list)
+	__end__
+	set _prepare ""
+
+define sketchpad Explode
+	set duration 0
+	set description "Displays stimuli"
+	draw image center=1 file="PopRed.jpg" scale="[balloon_size]" show_if=always x=0 y=0 z_index=0
+
+define sequence Explode_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run Explode always
+	run Explosion_sound always
+	run Clear_temporary_earnings always
+
+define sampler Explosion_sound
+	set volume 1
+	set stop_after 0
+	set sample "explosionMax_22k16bMono.wav"
+	set pitch 1
+	set pan 0
+	set fade_in 0
+	set duration sound
+	set description "Plays a sound file in .wav or .ogg format"
+
+define inline_script Imports_and_Defaults
+	set description "Executes Python code"
+	set _run ""
+	___prepare__
+	import random
+	
+	var.balloon_sizes = {}
+	for i in range(0,20):
+		y_val = 300 - (15*i)
+		j = "%.2f" % ((20 - i) / 20.0)
+		var.balloon_sizes[j] = y_val
+	
+	# Probability variable for random explosion time
+	var.Probability = 0.0
+	
+	# Set up sound for successful inflation
+	src1 = exp.pool['casino960msMax_22k16bMono.wav']
+	Casino_sound = sampler(src1, volume=1)
+	
+	# Set up sound for cashing out
+	src2 = exp.pool['finale_22k16bMono.wav']
+	Cash_out_sound = sampler(src2, volume=1)
+	
+	total_pennies = 0.0
+	var.total_cash = "$%.2f" % total_pennies
+	prac_pennies = 0.0
+	var.prac_cash = "$%.2f" % prac_pennies
+	
+	var.cash_out_button = "return"
+	var.inflate_button = "space"
+	
+	var.response = 0
+	__end__
+
+define sketchpad Inflate
+	set duration 0
+	set description "Displays stimuli"
+	draw image center=1 file="StemRed.jpg" scale="[balloon_size]" show_if=always x=0 y="[balloon_y]" z_index=1
+	draw image center=1 file="BalloonRed.jpg" scale="[balloon_size]" show_if=always x=0 y=0 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Press Space:" x=-384 y=320 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Press Enter:" x=384 y=320 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Money this round: [temp_cash]" x=-320 y=-352 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Total money earned: [total_cash]" x=320 y=-352 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Inflate balloon" x=-384 y=352 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Cash in money" x=384 y=352 z_index=0
+
+define inline_script Inflate_code_start
+	set description "Executes Python code"
+	___run__
+	# Check if this round is the explosion round
+	prob_seed = random.random()
+	var.explode = prob_seed < var.Probability
+	print var.explode
+	
+	if var.explode == u'no':
+		var.Probability += .05
+		if var.Probability > 1:
+			var.Probability = 1
+	__end__
+	___prepare__
+	balloon_size = "%.2f" % (var.rounds * 0.05)
+	
+	var.balloon_y = var.balloon_sizes[str(balloon_size)]
+	var.balloon_size = str(balloon_size)
+	__end__
+
+define sequence Inflate_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run Inflate_code_start always
+	run Inflate always
+	run Trial_decision always
+	run Decision_made always
+
+define loop Outside_Practice_loop
+	set source_file ""
+	set source table
+	set skip 0
+	set repeat 1
+	set order random
+	set offset no
+	set item Outside_Practice_sequence
+	set description "Repeatedly runs another item"
+	set cycles 2
+	set continuous no
+	set column_order explode_round
+	set break_if_on_first yes
+	set break_if never
+	setcycle 0 explode_round 2
+	setcycle 1 explode_round 15
+	run Outside_Practice_sequence
+
+define sequence Outside_Practice_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run Practice_prepare_script always
+	run Practice_Loop always
+	run Post_Practice always
+
+define sequence Post_Practice
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run Sum_total_earnings_1 always
+	run Practice_Total_earnings always
+
+define sketchpad Practice_Inflate
+	set duration 0
+	set description "Displays stimuli"
+	draw image center=1 file="StemRed.jpg" scale="[balloon_size]" show_if=always x=0 y="[balloon_y]" z_index=1
+	draw image center=1 file="BalloonRed.jpg" scale="[balloon_size]" show_if=always x=0 y=0 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Press Spacebar:" x=-384 y=320 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Press Enter:" x=384 y=320 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Money this round: [temp_cash]" x=-320 y=-352 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Total money earned: [prac_cash]" x=320 y=-352 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Inflate balloon" x=-384 y=352 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=18 html=yes show_if=always text="Cash in money" x=384 y=352 z_index=0
+
+define loop Practice_Loop
+	set source_file ""
+	set source table
+	set skip 0
+	set repeat 1
+	set order random
+	set offset no
+	set item Practice_sequence
+	set description "Repeatedly runs another item"
+	set cycles 20
+	set continuous no
+	set column_order ""
+	set break_if_on_first yes
+	set break_if "[break_bool] = 1"
+	setcycle 0 empty_column ""
+	setcycle 1 empty_column ""
+	setcycle 2 empty_column ""
+	setcycle 3 empty_column ""
+	setcycle 4 empty_column ""
+	setcycle 5 empty_column ""
+	setcycle 6 empty_column ""
+	setcycle 7 empty_column ""
+	setcycle 8 empty_column ""
+	setcycle 9 empty_column ""
+	setcycle 10 empty_column ""
+	setcycle 11 empty_column ""
+	setcycle 12 empty_column ""
+	setcycle 13 empty_column ""
+	setcycle 14 empty_column ""
+	setcycle 15 empty_column ""
+	setcycle 16 empty_column ""
+	setcycle 17 empty_column ""
+	setcycle 18 empty_column ""
+	setcycle 19 empty_column ""
+	run Practice_sequence
+
+define feedback Practice_Total_earnings
+	set reset_variables yes
+	set duration 1000
+	set description "Provides feedback to the participant"
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=36 html=yes show_if=always text="You have" x=0 y=-96 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=36 html=yes show_if=always text="[prac_cash]" x=0 y=0 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=36 html=yes show_if=always text="in your bank." x=0 y=96 z_index=0
+
+define sketchpad Practice_intro
+	set duration keypress
+	set description "Displays stimuli"
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=24 html=yes show_if=always text="Before we start earning money,<br /><br />let's try a couple practice rounds to get accustomed to the game.<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />Press any button to begin." x=0 y=0 z_index=0
+
+define inline_script Practice_prepare_script
+	set description "Executes Python code"
+	___run__
+	var.explode = u'no'
+	var.rounds = 1
+	
+	var_list = ['subject_nr', 'count_BART', 'count_BART_Trials_sequence', 'rounds', 'response_time_Trial_decision', 'response_Trial_decision', 'explode']
+	
+	temp_pennies = 0.0
+	var.temp_cash = "$%.2f" % temp_pennies
+	var.break_bool = 0
+	__end__
+	set _prepare ""
+
+define inline_script Practice_script
+	set description "Executes Python code"
+	___run__
+	if var.explode_round == var.rounds:
+		var.explode = u'yes'
+	__end__
+	___prepare__
+	balloon_size = "%.2f" % (var.rounds * 0.05)
+	
+	var.balloon_y = var.balloon_sizes[str(balloon_size)]
+	var.balloon_size = str(balloon_size)
+	__end__
+
+define sequence Practice_sequence
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run Practice_script always
+	run Practice_Inflate always
+	run Trial_decision always
+	run Decision_made always
+	run Explode_sequence "[explode] = yes"
+	run Rounds_controller "[explode] = no"
+	run new_advanced_delay always
+
+define inline_script Rounds_controller
+	set description "Executes Python code"
+	___run__
+	var.rounds += 1
+	
+	if var.response_Trial_decision == var.cash_out_button:
+		Cash_out_sound.play(duration=1000)
+		var.break_bool = 1
+	elif var.explode == u'no':
+		Casino_sound.play()
+		temp_pennies += 0.05
+	
+	var.temp_cash = "$%.2f" % temp_pennies
+	__end__
+	set _prepare ""
+
+define inline_script Sum_total_earnings
+	set description "Executes Python code"
+	___run__
+	total_pennies += temp_pennies
+	var.total_cash = "$%.2f" % total_pennies
+	__end__
+	set _prepare ""
+
+define inline_script Sum_total_earnings_1
+	set description "Executes Python code"
+	___run__
+	prac_pennies += temp_pennies
+	var.prac_cash = "$%.2f" % prac_pennies
+	__end__
+	set _prepare ""
+
+define feedback Total_earnings
+	set reset_variables yes
+	set duration 1000
+	set description "Provides feedback to the participant"
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=36 html=yes show_if=always text="You have" x=0 y=-96 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=36 html=yes show_if=always text="[total_cash]" x=0 y=0 z_index=0
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=36 html=yes show_if=always text="in your bank." x=0 y=96 z_index=0
+
+define keyboard_response Trial_decision
+	set timeout infinite
+	set flush yes
+	set duration keypress
+	set description "Collects keyboard responses"
+	set allowed_responses "return;space"
+
+define sketchpad Welcome_directions
+	set duration keypress
+	set description "Displays stimuli"
+	draw textline center=1 color=white font_bold=no font_family=mono font_italic=no font_size=24 html=yes show_if=always text="Welcome to the BART experiment.<br /><br /><br /><br />In this game you'll be inflating a balloon<br /><br />by pressing the Spacebar.<br /><br />Everytime you inflate the balloon you'll be given 5 cents.<br /><br />At any point in blowing up balloons you will be able to<br /><br />press the Enter button<br /><br />and your money will be stored in the bank.<br /><br />If you blow the balloon up too much there is a risk of it exploding.<br /><br />If the balloon explodes, then<br /><br />you lose the money you've earned on that balloon.<br /><br /><br /><br />Press any button when ready to continue." x=0 y=0 z_index=0
+
+define sequence experiment
+	set flush_keyboard yes
+	set description "Runs a number of items in sequence"
+	run Imports_and_Defaults always
+	run Welcome_directions always
+	run Practice_intro always
+	run Outside_Practice_loop always
+	run Begin_BART always
+	run BART_Loop always
+
+define advanced_delay new_advanced_delay
+	set jitter_mode Uniform
+	set jitter 0
+	set duration 600
+	set description "Waits for a specified duration"
+
+ 
