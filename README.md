@@ -13,5 +13,6 @@ by copy/pasting it into a new OpenSesame experiment by clicking on the top item 
 
 Feel free to send comments/questions/concerns to me at joshua.e.zosky@gmail.com
 
-If you use this, please cite me/acknowledge my efforts:
-Coming soon!
+If you use this, please cite me/acknowledge my efforts (remember to replace `Month DD, YYYY` with the date at which you downloaded from here):
+
+`Zosky, J. E. (2015). Imnotamember.GitHub.io. Retrieved Month DD, YYYY, from http://imnotamember.github.io/`
