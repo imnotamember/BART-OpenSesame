@@ -13,6 +13,6 @@ by copy/pasting it into a new OpenSesame experiment by clicking on the top item 
 
 Feel free to send comments/questions/concerns to me at joshua.e.zosky@gmail.com
 
-If you use this, please cite me/acknowledge my efforts (remember to replace `Month DD, YYYY` with the date at which you downloaded from here):
+If you use this, please cite me/acknowledge my efforts:
 
-`Zosky, J. E. (2015). Imnotamember.GitHub.io. Retrieved Month DD, YYYY, from http://imnotamember.github.io/`
+`Zosky, J. E. (2019). The Balloon Analogue Risk Task (BART) coded for OpenSesame: imnotamember/BART-OpenSesame. Retrieved from https://github.com/imnotamember/BART-OpenSesame (Original work published 2017)`
