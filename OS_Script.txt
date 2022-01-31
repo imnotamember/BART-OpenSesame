@@ -1,6 +1,6 @@
 ---
-API: 2
-OpenSesame: 3.1.6
+API: 2.1
+OpenSesame: 3.3.10
 Platform: posix
 ---
 set width 1024
@@ -26,7 +26,7 @@ set font_size 18
 set font_italic no
 set font_family mono
 set font_bold no
-set experiment_path "/media/rbot/My Passport/Kubuntu backup/Documents/Experiments/BART/Behavioral"
+set experiment_path "/Users/asdf/PycharmProjects/BART-OpenSesame"
 set disable_garbage_collection yes
 set description "Default description"
 set coordinates uniform
@@ -45,7 +45,6 @@ define sequence BART
 	run Bart_Post_Trials_sequence always
 
 define loop BART_Loop
-	set source_file ""
 	set source table
 	set skip 0
 	set repeat 20
@@ -220,7 +219,7 @@ define inline_script Inflate_code_start
 	# Check if this round is the explosion round
 	prob_seed = random.random()
 	var.explode = prob_seed < var.Probability
-	print var.explode
+	# print(var.explode)
 	
 	if var.explode == u'no':
 		var.Probability += .05
@@ -415,6 +414,7 @@ define feedback Total_earnings
 define keyboard_response Trial_decision
 	set timeout infinite
 	set flush yes
+	set event_type keypress
 	set duration keypress
 	set description "Collects keyboard responses"
 	set allowed_responses "return;space"
@@ -440,4 +440,3 @@ define advanced_delay new_advanced_delay
 	set duration 600
 	set description "Waits for a specified duration"
 
- 
